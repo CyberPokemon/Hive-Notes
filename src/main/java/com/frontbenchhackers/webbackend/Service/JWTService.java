@@ -49,9 +49,16 @@ public class JWTService {
                 .compact();
     }
 
-    private Key getKey() {
+    private SecretKey getKey() {
         byte[] keyBytes= Decoders.BASE64.decode(secretkey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
+    public String extractUsername(String token) {
+        return Jwts.parser() // Use `parser()` instead of `parserBuilder()`
+                .verifyWith(getKey()) // Use `verifyWith()` instead of `setSigningKey()`
+                .build()
+                .parseSignedClaims(token) // Use `parseSignedClaims()` instead of `parseClaimsJws()`
+                .getPayload()
+                .getSubject();
+    }
 }
