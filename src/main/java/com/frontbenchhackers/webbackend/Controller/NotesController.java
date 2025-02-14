@@ -4,9 +4,11 @@ import com.frontbenchhackers.webbackend.Model.Notes;
 import com.frontbenchhackers.webbackend.Service.JWTService;
 import com.frontbenchhackers.webbackend.Service.NotesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,5 +76,17 @@ public class NotesController {
         } catch (Exception e) {
             return ResponseEntity.status(404).body("Error deleting notes: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Notes>> searchNotes(@RequestParam String searchTerm) {
+        // Search notes by the search term
+        List<Notes> notes = notesService.searchNotes(searchTerm);
+
+        if (notes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+        }
+
+        return ResponseEntity.ok(notes);
     }
 }

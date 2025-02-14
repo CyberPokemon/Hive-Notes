@@ -90,4 +90,9 @@ public class NotesService {
         notesRepo.deleteByUserId(user.getId());  // Use userId instead of username
 
     }
+
+    public List<Notes> searchNotes(String searchTerm)
+    {
+        return notesRepo.searchNotes(searchTerm);
+    }
 }
