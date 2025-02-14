@@ -4,6 +4,7 @@ import com.frontbenchhackers.webbackend.Model.Notes;
 import com.frontbenchhackers.webbackend.Model.Users;
 import com.frontbenchhackers.webbackend.Repository.NotesRepo;
 import com.frontbenchhackers.webbackend.Repository.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -76,4 +77,17 @@ public class NotesService {
         notesRepo.delete(note); // Delete the note
     }
 
+    @Transactional
+    public void deleteAllNotesByUser(String username) {
+        // Fetch the user by username to get the userId
+        Users user = userRepo.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        // Delete all notes associated with this user
+        notesRepo.deleteByUserId(user.getId());  // Use userId instead of username
+
+    }
 }

@@ -63,4 +63,16 @@ public class NotesController {
             return ResponseEntity.status(404).body("Note not found or not owned by the user");
         }
     }
+
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<String> deleteAllNotes(@RequestHeader("Authorization") String token) {
+        String username = jwtService.extractUsername(token.substring(7)); // Extract username from JWT
+
+        try {
+            notesService.deleteAllNotesByUser(username);  // Delete all notes for that user
+            return ResponseEntity.ok("All notes deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Error deleting notes: " + e.getMessage());
+        }
+    }
 }
