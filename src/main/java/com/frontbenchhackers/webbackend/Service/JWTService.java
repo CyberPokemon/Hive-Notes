@@ -53,12 +53,30 @@ public class JWTService {
         byte[] keyBytes= Decoders.BASE64.decode(secretkey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+//    public String extractUsername(String token) {
+//        return Jwts.parser() // Use `parser()` instead of `parserBuilder()`
+//                .verifyWith(getKey()) // Use `verifyWith()` instead of `setSigningKey()`
+//                .build()
+//                .parseSignedClaims(token) // Use `parseSignedClaims()` instead of `parseClaimsJws()`
+//                .getPayload()
+//                .getSubject();
+//    }
+
     public String extractUsername(String token) {
-        return Jwts.parser() // Use `parser()` instead of `parserBuilder()`
-                .verifyWith(getKey()) // Use `verifyWith()` instead of `setSigningKey()`
-                .build()
-                .parseSignedClaims(token) // Use `parseSignedClaims()` instead of `parseClaimsJws()`
-                .getPayload()
-                .getSubject();
+        try {
+            System.out.println("Extracting username from token: " + token);
+            String username = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+            System.out.println("Extracted username: " + username);
+            return username;
+        } catch (Exception e) {
+            System.out.println("JWT Token parsing error: " + e.getMessage());
+            return null;
+        }
     }
+
 }

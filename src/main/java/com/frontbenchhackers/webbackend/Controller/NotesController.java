@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/notes")
 public class NotesController {
 
@@ -19,6 +20,19 @@ public class NotesController {
 
     @Autowired
     private JWTService jwtService;
+
+    @PostMapping("/createnote")
+    public ResponseEntity<Notes> createNote(@RequestBody Notes note, @RequestHeader("Authorization") String token) {
+        System.out.println(note);
+        String username = jwtService.extractUsername(token.substring(7)); // Remove "Bearer " prefix
+        return ResponseEntity.ok(notesService.createNote(note, username));
+    }
+
+    @PostMapping("/updatenote/{noteId}")
+    public ResponseEntity<Notes> updateNote(@PathVariable Long noteId, @RequestBody Notes updatedNote, @RequestHeader("Authorization") String token) {
+        String username = jwtService.extractUsername(token.substring(7));
+        return ResponseEntity.ok(notesService.updateNote(noteId, updatedNote, username));
+    }
 
     // Fetch all notes (without main content)
     @GetMapping("/all")
