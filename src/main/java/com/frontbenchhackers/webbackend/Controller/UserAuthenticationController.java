@@ -19,4 +19,11 @@ public class UserAuthenticationController {
         System.out.println("input details = "+user);
         return service.register(user);
     }
+
+    @PostMapping("/login")
+    public String login(@RequestBody Users user)
+    {
+        System.out.println(user);
+        return service.verify(user);
+    }
 }
