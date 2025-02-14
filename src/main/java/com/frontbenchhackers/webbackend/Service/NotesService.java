@@ -63,4 +63,17 @@ public class NotesService {
                 .filter(note -> note.getUser().getId() == user.getId()); // Compare using `==`
     }
 
+    public void deleteNoteById(Long noteId, String username) {
+        Users user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        Notes note = notesRepo.findById(noteId)
+                .filter(n -> n.getUser().getId()==(user.getId())) // Ensure the user owns the note
+                .orElseThrow(() -> new RuntimeException("Note not found or not owned by the user"));
+
+        notesRepo.delete(note); // Delete the note
+    }
+
 }

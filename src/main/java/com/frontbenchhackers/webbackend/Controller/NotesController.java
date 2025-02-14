@@ -51,4 +51,16 @@ public class NotesController {
         return note.map(n -> ResponseEntity.ok(n.getNoteMainContent()))
                 .orElseGet(() -> ResponseEntity.status(404).body("Note not found or not owned by user"));
     }
+
+    @DeleteMapping("/delete/{noteId}")
+    public ResponseEntity<String> deleteNote(@PathVariable Long noteId, @RequestHeader("Authorization") String token) {
+        String username = jwtService.extractUsername(token.substring(7)); // Remove "Bearer " prefix
+
+        try {
+            notesService.deleteNoteById(noteId, username);
+            return ResponseEntity.ok("Note deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Note not found or not owned by the user");
+        }
+    }
 }
