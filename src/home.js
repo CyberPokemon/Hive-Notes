@@ -1,19 +1,27 @@
-// A simple script for handling folder clicks, new note creation, and modal toggling
-
 document.addEventListener("DOMContentLoaded", () => {
-    // Data structure for folders & notes
-    // Each folder has a name and an array of notes
+    /****************************************************
+     * DATA STRUCTURE
+     ****************************************************/
+    // Rename Folder 1 -> My Notes (so it matches your "My Notes" section)
     let foldersData = [
       {
-        name: "Folder 1",
+        name: "My Notes",
         notes: [
-          { title: "Note 1 in Folder 1", keywords: "#important", content: "Some content..." },
+          {
+            title: "Sample Note in My Notes",
+            keywords: "#example",
+            content: "<p>This is a sample note in <strong>My Notes</strong>.</p>",
+          },
         ],
       },
       {
         name: "Folder 2",
         notes: [
-          { title: "Work Plan", keywords: "#work #priority", content: "Complete tasks..." },
+          {
+            title: "Work Plan",
+            keywords: "#work #priority",
+            content: "<p>Complete <em>tasks</em> for the project.</p>",
+          },
         ],
       },
       {
@@ -26,16 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     ];
   
-    let currentFolderIndex = null; // Track which folder is currently selected
+    let currentFolderIndex = null;
   
-    // DOM elements
+    /****************************************************
+     * DOM ELEMENTS
+     ****************************************************/
     const foldersList = document.getElementById("foldersList");
     const folderTitle = document.getElementById("folderTitle");
     const notesList = document.getElementById("notesList");
     const emptyMessage = document.getElementById("emptyMessage");
     const searchBar = document.getElementById("searchBar");
   
-    // Modal elements
+    // Modal (New Note)
     const newNoteModal = document.getElementById("newNoteModal");
     const newNoteBtn = document.getElementById("newNoteBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
@@ -46,14 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const newFolderNameInput = document.getElementById("newFolderName");
     const noteKeywordsInput = document.getElementById("noteKeywords");
   
-    /********************************************************
-     * Initialize folders list in the sidebar
-     ********************************************************/
+    /****************************************************
+     * INITIALIZE FOLDERS IN SIDEBAR
+     ****************************************************/
     function populateFoldersList() {
-      // Clear existing items
       foldersList.innerHTML = "";
-  
-      // Rebuild the sidebar folder items from foldersData
       foldersData.forEach((folder, index) => {
         const li = document.createElement("li");
         li.textContent = folder.name;
@@ -65,67 +72,69 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   
-    /********************************************************
-     * Show notes for a selected folder
-     ********************************************************/
+    /****************************************************
+     * SHOW NOTES FOR SELECTED FOLDER
+     ****************************************************/
     function showFolderNotes(folderIndex) {
       const folder = foldersData[folderIndex];
-      // Update heading
       folderTitle.textContent = `Notes in "${folder.name}"`;
-      // Clear notesList
       notesList.innerHTML = "";
   
       if (folder.notes.length === 0) {
-        // Show empty message
         emptyMessage.style.display = "block";
       } else {
-        // Hide empty message
         emptyMessage.style.display = "none";
-  
-        // Display each note
-        folder.notes.forEach((note) => {
+        folder.notes.forEach((note, noteIndex) => {
           const noteItem = document.createElement("div");
-          noteItem.innerHTML = `
-            <h3>${note.title}</h3>
-            <p><strong>Keywords:</strong> ${note.keywords}</p>
-            <p>${note.content}</p>
-          `;
           noteItem.style.border = "1px solid #ddd";
           noteItem.style.padding = "0.5rem";
           noteItem.style.borderRadius = "4px";
-  
+          noteItem.style.cursor = "pointer";
+          noteItem.innerHTML = `
+            <h3>${note.title}</h3>
+            <p><strong>Keywords:</strong> ${note.keywords}</p>
+          `;
+          // Clicking the note => open editor page
+          noteItem.addEventListener("click", () => {
+            openEditor(folderIndex, noteIndex);
+          });
           notesList.appendChild(noteItem);
         });
       }
     }
   
-    /********************************************************
-     * Modal Controls
-     ********************************************************/
-    // Show modal
+    /****************************************************
+     * OPEN EDITOR PAGE
+     ****************************************************/
+    function openEditor(folderIndex, noteIndex) {
+      // 1) Save the entire data structure to localStorage
+      localStorage.setItem("foldersData", JSON.stringify(foldersData));
+      // 2) Save which note we’re opening
+      localStorage.setItem("currentFolderIndex", folderIndex);
+      localStorage.setItem("currentNoteIndex", noteIndex);
+      // 3) Redirect to editor.html
+      window.location.href = "editor.html";
+    }
+  
+    /****************************************************
+     * MODAL CONTROLS (NEW NOTE)
+     ****************************************************/
     newNoteBtn.addEventListener("click", () => {
-      // Populate the folder dropdown
       updateFolderDropdown();
-      // Show the modal
       newNoteModal.style.display = "block";
     });
-  
-    // Close modal when '×' is clicked
     closeModalBtn.addEventListener("click", () => {
       newNoteModal.style.display = "none";
     });
-  
-    // Close modal if user clicks outside of modal-content
-    window.addEventListener("click", (event) => {
-      if (event.target === newNoteModal) {
+    window.addEventListener("click", (e) => {
+      if (e.target === newNoteModal) {
         newNoteModal.style.display = "none";
       }
     });
   
-    // Update folder dropdown with existing folders + 'New Folder...' option
+    // Populate the folder dropdown in the New Note modal
     function updateFolderDropdown() {
       noteFolderSelect.innerHTML = "";
-  
       foldersData.forEach((folder) => {
         const option = document.createElement("option");
         option.value = folder.name;
@@ -133,19 +142,18 @@ document.addEventListener("DOMContentLoaded", () => {
         noteFolderSelect.appendChild(option);
       });
   
-      // Add 'New Folder...' option at the end
+      // 'Create New Folder...' option
       const newFolderOption = document.createElement("option");
       newFolderOption.value = "new_folder";
       newFolderOption.textContent = "Create New Folder...";
       noteFolderSelect.appendChild(newFolderOption);
   
-      // Default selection
       noteFolderSelect.selectedIndex = 0;
       newFolderField.style.display = "none";
       newFolderNameInput.value = "";
     }
   
-    // If user selects 'New Folder...', show the new folder input field
+    // Show/hide new folder name field
     noteFolderSelect.addEventListener("change", (e) => {
       if (e.target.value === "new_folder") {
         newFolderField.style.display = "block";
@@ -155,38 +163,29 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   
-    /********************************************************
-     * Handle New Note Form Submission
-     ********************************************************/
+    // Handle new note creation
     newNoteForm.addEventListener("submit", (e) => {
       e.preventDefault();
   
-      // Gather form data
       const noteName = noteTitleInput.value.trim();
       let folderName = noteFolderSelect.value;
-      const newFolderName = newFolderNameInput.value.trim();
+      const typedFolderName = newFolderNameInput.value.trim();
       const noteKeywords = noteKeywordsInput.value.trim();
   
-      // If user selected 'new_folder', create a new folder
-      if (folderName === "new_folder" && newFolderName) {
-        folderName = newFolderName; // use typed folder name
-        // Add new folder to foldersData
+      // If user selected 'new_folder'
+      if (folderName === "new_folder" && typedFolderName) {
+        folderName = typedFolderName;
         foldersData.push({
           name: folderName,
           notes: [],
         });
-        // Re-populate the sidebar
         populateFoldersList();
       }
   
-      // Find the folder object in foldersData
+      // Find or create the target folder
       let targetFolderIndex = foldersData.findIndex((f) => f.name === folderName);
       if (targetFolderIndex === -1) {
-        // If folder doesn't exist for some reason, push a new one
-        foldersData.push({
-          name: folderName,
-          notes: [],
-        });
+        foldersData.push({ name: folderName, notes: [] });
         targetFolderIndex = foldersData.length - 1;
       }
   
@@ -194,36 +193,30 @@ document.addEventListener("DOMContentLoaded", () => {
       const newNote = {
         title: noteName,
         keywords: noteKeywords,
-        content: "Write your content here...", // or add a content field to the form
+        content: "<p>Start writing your content here...</p>",
       };
-  
-      // Push it into that folder's notes array
       foldersData[targetFolderIndex].notes.push(newNote);
   
-      // Clear form
+      // Clear form & hide modal
       newNoteForm.reset();
       newFolderField.style.display = "none";
-  
-      // Hide modal
       newNoteModal.style.display = "none";
   
-      // If the user just created a note in the currently open folder, refresh the display
+      // If currently viewing that folder, refresh
       if (currentFolderIndex === targetFolderIndex) {
         showFolderNotes(targetFolderIndex);
       }
     });
   
-    /********************************************************
-     * Searching notes (basic example)
-     ********************************************************/
+    /****************************************************
+     * SEARCHING NOTES
+     ****************************************************/
     searchBar.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase().trim();
-      // If no folder is selected yet, do nothing
       if (currentFolderIndex == null) return;
   
       const folder = foldersData[currentFolderIndex];
       const filteredNotes = folder.notes.filter((note) => {
-        // Check note title, content, or keywords
         return (
           note.title.toLowerCase().includes(query) ||
           note.content.toLowerCase().includes(query) ||
@@ -231,29 +224,39 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       });
   
-      // Update the display
       notesList.innerHTML = "";
       if (filteredNotes.length === 0) {
         emptyMessage.style.display = "block";
       } else {
         emptyMessage.style.display = "none";
-        filteredNotes.forEach((note) => {
+        filteredNotes.forEach((note, noteIndex) => {
           const noteItem = document.createElement("div");
-          noteItem.innerHTML = `
-            <h3>${note.title}</h3>
-            <p><strong>Keywords:</strong> ${note.keywords}</p>
-            <p>${note.content}</p>
-          `;
           noteItem.style.border = "1px solid #ddd";
           noteItem.style.padding = "0.5rem";
           noteItem.style.borderRadius = "4px";
+          noteItem.style.cursor = "pointer";
+          noteItem.innerHTML = `
+            <h3>${note.title}</h3>
+            <p><strong>Keywords:</strong> ${note.keywords}</p>
+          `;
+          noteItem.addEventListener("click", () => {
+            openEditor(currentFolderIndex, noteIndex);
+          });
           notesList.appendChild(noteItem);
         });
       }
     });
   
-    // On page load, populate sidebar and default to no folder selected
+    /****************************************************
+     * ON PAGE LOAD
+     ****************************************************/
     populateFoldersList();
-    folderTitle.textContent = "My Notes"; // or show instructions
+    // Automatically select the first folder so notes show immediately
+    if (foldersData.length > 0) {
+      currentFolderIndex = 0;
+      showFolderNotes(0); // Display My Notes by default
+    } else {
+      folderTitle.textContent = "My Notes";
+    }
   });
   

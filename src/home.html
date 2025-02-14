@@ -2,38 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HiveNotes - Home</title>
-  <!-- Link to home.css -->
   <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-
-  <!-- Top Navigation Bar -->
+  <!-- NAVIGATION BAR -->
   <nav class="navbar">
     <div class="logo">HiveNotes</div>
     <div class="nav-profile">
-      <!-- Profile icon or avatar -->
-      <!-- Changed class from 'profile' to 'profile-icon' to match CSS -->
-      <img src="profile.png" alt="profile-icon" class="profile-icon" />
+      <img src="profile.png" alt="Profile Icon" class="profile-icon" />
     </div>
   </nav>
 
-  <!-- Main container (sidebar + main content) -->
+  <!-- MAIN CONTAINER: Sidebar + Notes List -->
   <div class="main-container">
     
-    <!-- Sidebar / Folders section -->
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <h2>Folders</h2>
-      <ul class="folders-list" id="foldersList">
-        <!-- These items can be dynamically populated from JS as well -->
-        <li>Folder 1</li>
-        <li>Folder 2</li>
-        <li>Folder 3</li>
-        <li>Folder 4</li>
-      </ul>
+      <ul class="folders-list" id="foldersList"></ul>
 
-      <!-- New Note & Search Controls -->
       <div class="sidebar-controls">
         <button class="new-note-btn" id="newNoteBtn">+ New Note</button>
         <input
@@ -41,23 +30,22 @@
           class="search-bar"
           id="searchBar"
           placeholder="Search..."
-          title="Search for notes by name or #keyword"
+          title="Search notes by name or #keyword"
         />
       </div>
     </aside>
 
-    <!-- Main content area: My Notes -->
-    <section class="notes-area">
-      <!-- We’ll dynamically change this heading based on the folder clicked -->
+    <!-- NOTES AREA -->
+    <section class="notes-area" id="notesArea">
       <h2 id="folderTitle">My Notes</h2>
       <div class="notes-list" id="notesList">
-        <!-- Example placeholder for notes. Can be dynamically generated -->
         <p class="empty-message" id="emptyMessage">
           No notes found. Click “New Note” to create one!
         </p>
       </div>
     </section>
   </div>
+
 
   <!-- MODAL for creating a new note (hidden by default) -->
   <div class="modal" id="newNoteModal">
@@ -92,7 +80,6 @@
     </div>
   </div>
 
-  <!-- Link to home.js -->
   <script src="home.js"></script>
 </body>
 </html>
