@@ -16,8 +16,9 @@ public interface NotesRepo extends JpaRepository<Notes, Long> {
     void deleteByUserId(long id);
 
     @Query("SELECT n FROM Notes n WHERE " +
-            "LOWER(n.noteName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+            "(LOWER(n.noteName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "LOWER(n.noteFolder) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(n.noteKeywords) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<Notes> searchNotes(@Param("searchTerm") String searchTerm);
+            "LOWER(n.noteKeywords) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "AND n.user.id = :userId")
+    List<Notes> searchNotesByUser(@Param("searchTerm") String searchTerm, @Param("userId") Long userId);
 }

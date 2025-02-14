@@ -91,8 +91,11 @@ public class NotesService {
 
     }
 
-    public List<Notes> searchNotes(String searchTerm)
-    {
-        return notesRepo.searchNotes(searchTerm);
+    public List<Notes> searchNotes(String searchTerm, String username) {
+        Users user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return notesRepo.searchNotesByUser(searchTerm, user.getId()); // Pass userId instead of username
     }
 }

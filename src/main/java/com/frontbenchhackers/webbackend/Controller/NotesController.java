@@ -79,9 +79,9 @@ public class NotesController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Notes>> searchNotes(@RequestParam String searchTerm) {
-        // Search notes by the search term
-        List<Notes> notes = notesService.searchNotes(searchTerm);
+    public ResponseEntity<List<Notes>> searchNotes(@RequestParam String searchTerm, @RequestHeader("Authorization") String token) {
+        String username = jwtService.extractUsername(token.substring(7)); // Remove "Bearer " prefix
+        List<Notes> notes = notesService.searchNotes(searchTerm, username);
 
         if (notes.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
