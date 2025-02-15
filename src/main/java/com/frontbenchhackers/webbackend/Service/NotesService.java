@@ -188,7 +188,8 @@ public class NotesService {
                                 return Map.of(
                                         "title", Optional.ofNullable(note.getNoteName()).orElse("Untitled Note"),
                                         "keywords", Optional.ofNullable(note.getNoteKeywords()).orElse(""),
-                                        "content", Optional.ofNullable(note.getNoteMainContent()).orElse("<p>No Content</p>")
+                                        "content", Optional.ofNullable(note.getNoteMainContent()).orElse("<p>No Content</p>"),
+                                        "contentid", Optional.ofNullable(note.getId()).orElse(-1L)
                                 );
                             }, Collectors.toList())
                     ));
