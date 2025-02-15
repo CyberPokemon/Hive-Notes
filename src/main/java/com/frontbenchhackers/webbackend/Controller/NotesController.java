@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,15 +37,15 @@ public class NotesController {
         return ResponseEntity.ok(notesService.updateNote(noteId, updatedNote, username));
     }
 
-    // Fetch all notes (without main content)
-    @GetMapping("/all")
-    public ResponseEntity<List<Notes>> getAllNotes(@RequestHeader("Authorization") String token) {
-        String username = jwtService.extractUsername(token.replace("Bearer ", "")); // Extract username from JWT
-        List<Notes> notes = notesService.getAllNotes(username);
-        return ResponseEntity.ok(notes);
-    }
+//     Fetch all notes (without main content)
+//    @GetMapping("/all")
+//    public ResponseEntity<List<Notes>> getAllNotes(@RequestHeader("Authorization") String token) {
+//        String username = jwtService.extractUsername(token.replace("Bearer ", "")); // Extract username from JWT
+//        List<Notes> notes = notesService.getAllNotes(username);
+//        return ResponseEntity.ok(notes);
+//    }
 
-    // Fetch a specific note's full content
+//     Fetch a specific note's full content
     @GetMapping("/{id}")
     public ResponseEntity<String> getNoteContent(@PathVariable Long id, @RequestHeader("Authorization") String token) {
         String username = jwtService.extractUsername(token.replace("Bearer ", ""));
@@ -53,6 +54,15 @@ public class NotesController {
         return note.map(n -> ResponseEntity.ok(n.getNoteMainContent()))
                 .orElseGet(() -> ResponseEntity.status(404).body("Note not found or not owned by user"));
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Map<String, Object>>> getAllNotes(@RequestHeader("Authorization") String token) {
+        String username = jwtService.extractUsername(token.replace("Bearer ", ""));
+        List<Map<String, Object>> notesResponse = notesService.getAllNotesFormatted(username);
+        return ResponseEntity.ok(notesResponse);
+    }
+
+
 
     @DeleteMapping("/delete/{noteId}")
     public ResponseEntity<String> deleteNote(@PathVariable Long noteId, @RequestHeader("Authorization") String token) {

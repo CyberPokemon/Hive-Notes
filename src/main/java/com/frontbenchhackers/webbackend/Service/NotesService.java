@@ -10,8 +10,11 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NotesService {
@@ -97,5 +100,111 @@ public class NotesService {
             throw new RuntimeException("User not found");
         }
         return notesRepo.searchNotesByUser(searchTerm, user.getId()); // Pass userId instead of username
+    }
+
+//    public List<Map<String, Object>> getAllNotesFormatted(String username) {
+//        Users user = userRepo.findByUsername(username);
+//        if (user == null) {
+//            throw new UsernameNotFoundException("User not found");
+//        }
+//
+//        List<Notes> notesList = notesRepo.findByUser(user);
+//
+//        // Group notes by folder
+//        Map<String, List<Map<String, Object>>> groupedNotes = notesList.stream()
+//                .collect(Collectors.groupingBy(
+//                        Notes::getNoteFolder,
+//                        Collectors.mapping(note -> Map.of(
+//                                "title", note.getNoteName(),
+//                                "keywords", note.getNoteKeywords(),
+//                                "content", note.getNoteMainContent()
+//                        ), Collectors.toList())
+//                ));
+//
+//        // Convert map to list format required
+//        return groupedNotes.entrySet().stream()
+//                .map(entry -> Map.of(
+//                        "name", entry.getKey(),
+//                        "notes", entry.getValue()
+//                ))
+//                .collect(Collectors.toList());
+//    }
+
+//    public List<Map<String, Object>> getAllNotesFormatted(String username) {
+//        Users user = userRepo.findByUsername(username);
+//        if (user == null) {
+//            throw new UsernameNotFoundException("User not found");
+//        }
+//
+//        List<Notes> notesList = notesRepo.findByUser(user);
+//        if (notesList == null) {
+//            notesList = Collections.emptyList();
+//        }
+//        try {
+//            // Group notes by folder name
+//            Map<String, List<Map<String, Object>>> groupedNotes = notesList.stream()
+//                    .collect(Collectors.groupingBy(
+//                            note -> note.getNoteFolder() != null ? note.getNoteFolder() : "Uncategorized",
+//                            Collectors.mapping(note -> Map.of(
+//                                    "title", note.getNoteName(),
+//                                    "keywords", note.getNoteKeywords() != null ? note.getNoteKeywords() : "",
+//                                    "content", note.getNoteMainContent() != null ? "<p>No Content</p>" : note.getNoteMainContent()
+//                            ), Collectors.toList())
+//                    ));
+//
+//            // Convert to final JSON-like structure
+//            return groupedNotes.entrySet().stream()
+//                    .map(entry -> Map.of(
+//                            "name", entry.getKey(),
+//                            "notes", entry.getValue()
+//                    ))
+//                    .collect(Collectors.toList());
+//        }
+//        catch (Exception e)
+//        {
+//            System.out.println("error ocurerd here");
+//        }
+//        return null;
+//    }
+
+
+    public List<Map<String, Object>> getAllNotesFormatted(String username) {
+        Users user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        List<Notes> notesList = notesRepo.findByUser(user);
+        if (notesList == null) {
+            notesList = Collections.emptyList();
+        }
+        try {
+            // Group notes by folder name
+            Map<String, List<Map<String, Object>>> groupedNotes = notesList.stream()
+                    .collect(Collectors.groupingBy(
+                            note -> Optional.ofNullable(note.getNoteFolder()).orElse("Uncategorized"),
+                            Collectors.mapping(note -> {
+                                // Safely map each note
+                                return Map.of(
+                                        "title", Optional.ofNullable(note.getNoteName()).orElse("Untitled Note"),
+                                        "keywords", Optional.ofNullable(note.getNoteKeywords()).orElse(""),
+                                        "content", Optional.ofNullable(note.getNoteMainContent()).orElse("<p>No Content</p>")
+                                );
+                            }, Collectors.toList())
+                    ));
+
+            // Convert to final JSON-like structure
+            return groupedNotes.entrySet().stream()
+                    .map(entry -> Map.of(
+                            "name", entry.getKey(),
+                            "notes", entry.getValue()
+                    ))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            System.out.println("Error occurred in getAllNotesFormatted: " + e.getMessage());
+//            e.printStackTrace(); // Print full stack trace for better debugging
+            return Collections.emptyList();  // Return an empty list in case of error
+        }
     }
 }
