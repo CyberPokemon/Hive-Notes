@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 @RequestMapping("/api/notes")
 public class NotesController {
 
