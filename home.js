@@ -261,24 +261,21 @@ searchBar.addEventListener("input", async (e) => {
 });
 
 /****************************************************
- * UPDATE SEARCH RESULTS IN UI
+ * UPDATE SEARCH RESULTS IN UI (Fix for Click Issue)
  ****************************************************/
 function updateSearchResults(searchResults) {
   foldersList.innerHTML = ""; // Clear folders list
   notesList.innerHTML = ""; // Clear notes list
   emptyMessage.style.display = searchResults.length === 0 ? "block" : "none";
 
-  searchResults.forEach((folder, folderIndex) => {
+  searchResults.forEach((folder) => {
     // Create folder item
     const folderItem = document.createElement("li");
     folderItem.textContent = folder.name;
-    folderItem.addEventListener("click", () => {
-      showFolderNotes(folderIndex);
-    });
     foldersList.appendChild(folderItem);
 
     // Display notes inside this folder
-    folder.notes.forEach((note, noteIndex) => {
+    folder.notes.forEach((note) => {
       const noteItem = document.createElement("div");
       noteItem.style.border = "1px solid #ddd";
       noteItem.style.padding = "0.5rem";
@@ -289,13 +286,26 @@ function updateSearchResults(searchResults) {
         <p><strong>Keywords:</strong> ${note.keywords}</p>
       `;
       noteItem.addEventListener("click", () => {
-        openEditor(folderIndex, noteIndex);
+        openSearchEditor(note); // Pass entire note object
       });
       notesList.appendChild(noteItem);
     });
   });
 }
 
+/****************************************************
+ * OPEN EDITOR FOR SEARCH RESULTS
+ ****************************************************/
+function openSearchEditor(note) {
+  localStorage.setItem("currentContentId", note.contentid);
+  localStorage.setItem("currentNoteName", note.title);
+  localStorage.setItem("currentNoteFolder", note.folder);
+  localStorage.setItem("currentNoteKeywords", note.keywords);
+  localStorage.setItem("currentNoteContent", note.content);
+  
+  // Redirect to editor page
+  window.location.href = "editor.html";
+}
 
   /****************************************************
    * ON PAGE LOAD
