@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,13 +91,13 @@ public class NotesService {
 
     }
 
-    public List<Notes> searchNotes(String searchTerm, String username) {
-        Users user = userRepo.findByUsername(username);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-        return notesRepo.searchNotesByUser(searchTerm, user.getId()); // Pass userId instead of username
-    }
+//    public List<Notes> searchNotes(String searchTerm, String username) {
+//        Users user = userRepo.findByUsername(username);
+//        if (user == null) {
+//            throw new RuntimeException("User not found");
+//        }
+//        return notesRepo.searchNotesByUser(searchTerm, user.getId()); // Pass userId instead of username
+//    }
 
 //    public List<Map<String, Object>> getAllNotesFormatted(String username) {
 //        Users user = userRepo.findByUsername(username);
@@ -208,4 +205,42 @@ public class NotesService {
             return Collections.emptyList();  // Return an empty list in case of error
         }
     }
+
+
+    public List<Map<String, Object>> searchNotes(String searchTerm, String username) {
+        Users user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Fetch notes by search term and user ID
+        List<Notes> notes = notesRepo.searchNotesByUser(searchTerm, user.getId());
+
+        // Group notes by folder name
+        Map<String, List<Map<String, Object>>> groupedNotes = new HashMap<>();
+
+        for (Notes note : notes) {
+            // Convert each note to the required format
+            Map<String, Object> noteData = new HashMap<>();
+            noteData.put("title", note.getNoteName());
+            noteData.put("content", note.getNoteMainContent());
+            noteData.put("keywords", note.getNoteKeywords());
+            noteData.put("contentid", note.getId()); // Assuming 'id' is the content ID
+
+            // Add to the corresponding folder group
+            groupedNotes.computeIfAbsent(note.getNoteFolder(), k -> new ArrayList<>()).add(noteData);
+        }
+
+        // Convert to required format
+        List<Map<String, Object>> formattedResponse = new ArrayList<>();
+        for (Map.Entry<String, List<Map<String, Object>>> entry : groupedNotes.entrySet()) {
+            Map<String, Object> folderData = new HashMap<>();
+            folderData.put("name", entry.getKey());  // Folder name
+            folderData.put("notes", entry.getValue()); // List of notes in the folder
+            formattedResponse.add(folderData);
+        }
+
+        return formattedResponse;
+    }
+
 }

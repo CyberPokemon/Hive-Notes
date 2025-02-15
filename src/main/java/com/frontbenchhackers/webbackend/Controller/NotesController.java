@@ -88,15 +88,32 @@ public class NotesController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Notes>> searchNotes(@RequestParam String searchTerm, @RequestHeader("Authorization") String token) {
-        String username = jwtService.extractUsername(token.substring(7)); // Remove "Bearer " prefix
-        List<Notes> notes = notesService.searchNotes(searchTerm, username);
+//    @GetMapping("/search")
+//    public ResponseEntity<List<Notes>> searchNotes(@RequestParam String searchTerm, @RequestHeader("Authorization") String token) {
+//        String username = jwtService.extractUsername(token.substring(7)); // Remove "Bearer " prefix
+//        List<Notes> notes = notesService.searchNotes(searchTerm, username);
+//
+//        if (notes.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+//        }
+//
+//        return ResponseEntity.ok(notes);
+//    }
 
-        if (notes.isEmpty()) {
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Map<String, Object>>> searchNotes(
+            @RequestParam String searchTerm,
+            @RequestHeader("Authorization") String token) {
+
+        String username = jwtService.extractUsername(token.substring(7)); // Extract username from JWT
+        List<Map<String, Object>> result = notesService.searchNotes(searchTerm, username);
+
+        if (result.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
         }
 
-        return ResponseEntity.ok(notes);
+        return ResponseEntity.ok(result);
     }
+
 }
