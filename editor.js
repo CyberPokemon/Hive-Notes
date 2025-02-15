@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+  const token = localStorage.getItem("jwtToken");
+
+  // If token does not exist, redirect to the login page
+  if (!token) {
+    alert("Unauthorized! Please log in first.");
+    window.location.href = "index.html"; // Redirect to login page
+  }
     // Retrieve note data from localStorage
     let foldersData = JSON.parse(localStorage.getItem("foldersData")) || [];
     let currentFolderIndex = parseInt(localStorage.getItem("currentFolderIndex"));

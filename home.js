@@ -1,4 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+  // Check if JWT token exists in localStorage
+  const token = localStorage.getItem("jwtToken");
+
+  // If token does not exist, redirect to the login page
+  if (!token) {
+    alert("Unauthorized! Please log in first.");
+    window.location.href = "index.html"; // Redirect to login page
+  }
+  
   /****************************************************
    * DATA STRUCTURE (Fetch data from API)
    ****************************************************/
