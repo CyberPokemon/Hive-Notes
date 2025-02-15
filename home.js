@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Unauthorized! Please log in first.");
     window.location.href = "index.html"; // Redirect to login page
   }
-  
+
   /****************************************************
    * DATA STRUCTURE (Fetch data from API)
    ****************************************************/
@@ -84,35 +84,111 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /****************************************************
-   * SHOW NOTES FOR SELECTED FOLDER
-   ****************************************************/
-  function showFolderNotes(folderIndex) {
-    const folder = foldersData[folderIndex];
-    folderTitle.textContent = `Notes in "${folder.name}"`;
-    notesList.innerHTML = "";
+ * SHOW NOTES FOR SELECTED FOLDER (With Delete Option)
+ ****************************************************/
+function showFolderNotes(folderIndex) {
+  const folder = foldersData[folderIndex];
+  folderTitle.textContent = `Notes in "${folder.name}"`;
+  notesList.innerHTML = "";
 
-    if (folder.notes.length === 0) {
-      emptyMessage.style.display = "block";
-    } else {
-      emptyMessage.style.display = "none";
-      folder.notes.forEach((note, noteIndex) => {
-        const noteItem = document.createElement("div");
-        noteItem.style.border = "1px solid #ddd";
-        noteItem.style.padding = "0.5rem";
-        noteItem.style.borderRadius = "4px";
-        noteItem.style.cursor = "pointer";
-        noteItem.innerHTML = `
-          <h3>${note.title}</h3>
-          <p><strong>Keywords:</strong> ${note.keywords}</p>
-        `;
-        // Clicking the note => open editor page
-        noteItem.addEventListener("click", () => {
-          openEditor(folderIndex, noteIndex);
-        });
-        notesList.appendChild(noteItem);
+  if (folder.notes.length === 0) {
+    emptyMessage.style.display = "block";
+  } else {
+    emptyMessage.style.display = "none";
+    folder.notes.forEach((note, noteIndex) => {
+      const noteItem = document.createElement("div");
+      noteItem.style.border = "1px solid #ddd";
+      noteItem.style.padding = "0.5rem";
+      noteItem.style.borderRadius = "4px";
+      noteItem.style.cursor = "pointer";
+      noteItem.innerHTML = `
+        <h3>${note.title}</h3>
+        <p><strong>Keywords:</strong> ${note.keywords}</p>
+      `;
+
+      // Clicking note opens editor
+      noteItem.addEventListener("click", () => {
+        openEditor(folderIndex, noteIndex);
       });
-    }
+
+      // Delete Button (🗑️)
+      const deleteBtn = document.createElement("button");
+      deleteBtn.innerHTML = "🗑️";
+      deleteBtn.style.marginLeft = "10px";
+      deleteBtn.style.cursor = "pointer";
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Prevent triggering note opening
+        deleteNote(note.contentid, folderIndex);
+      });
+
+      noteItem.appendChild(deleteBtn);
+      notesList.appendChild(noteItem);
+    });
   }
+}
+
+/****************************************************
+ * DELETE A SINGLE NOTE
+ ****************************************************/
+async function deleteNote(contentId, folderIndex) {
+  const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    console.error("No JWT token found.");
+    return;
+  }
+
+  if (!confirm("Are you sure you want to delete this note?")) return;
+
+  try {
+    const response = await fetch(`http://127.0.0.1:8080/api/notes/delete/${contentId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete the note.");
+    }
+
+    console.log("Note deleted successfully!");
+    fetchFoldersData(); // Refresh UI after deletion
+  } catch (error) {
+    console.error("Error deleting note:", error);
+  }
+}
+
+/****************************************************
+ * DELETE ALL NOTES
+ ****************************************************/
+document.getElementById("deleteAllBtn").addEventListener("click", async () => {
+  const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    console.error("No JWT token found.");
+    return;
+  }
+
+  if (!confirm("Are you sure you want to delete ALL notes? This cannot be undone!")) return;
+
+  try {
+    const response = await fetch("http://127.0.0.1:8080/api/notes/deleteAll", {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete all notes.");
+    }
+
+    console.log("All notes deleted successfully!");
+    fetchFoldersData(); // Refresh UI after deletion
+  } catch (error) {
+    console.error("Error deleting all notes:", error);
+  }
+});
+
 
   /****************************************************
    * OPEN EDITOR PAGE

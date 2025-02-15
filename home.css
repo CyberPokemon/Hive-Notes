@@ -189,3 +189,33 @@
   .logout-btn:hover {
     background-color: #c9302c;
   }
+
+  /* Delete All Button */
+#deleteAllBtn {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background 0.3s ease, transform 0.2s ease;
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  text-align: center;
+}
+
+/* Hover effect */
+#deleteAllBtn:hover {
+  background-color: #c9302c;
+  transform: scale(1.05);
+}
+
+/* Button when clicked */
+#deleteAllBtn:active {
+  transform: scale(0.95);
+}
+
