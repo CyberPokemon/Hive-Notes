@@ -155,12 +155,17 @@ document.addEventListener("DOMContentLoaded", async () => {
    * OPEN EDITOR PAGE
    ****************************************************/
   function openEditor(folderName, noteIndex) {
-    localStorage.setItem("foldersData", JSON.stringify(foldersData));
+    const note = foldersData[noteIndex];  // Get the selected note
+    const noteId = note.noteId;  // Assume each note has a unique `noteId`
+  
+    // Save note ID, folder name, and note index in localStorage
+    localStorage.setItem("noteId", noteId);
     localStorage.setItem("currentFolderName", folderName);
     localStorage.setItem("currentNoteIndex", noteIndex);
+  
+    // Redirect to the editor page
     window.location.href = "editor.html";
   }
-
   /****************************************************
    * HANDLE CREATE NOTE FORM SUBMISSION
    ****************************************************/
