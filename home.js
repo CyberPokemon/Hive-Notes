@@ -307,6 +307,15 @@ function openSearchEditor(note) {
   window.location.href = "editor.html";
 }
 
+/****************************************************
+   * LOGOUT FUNCTIONALITY
+   ****************************************************/
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn.addEventListener("click", () => {
+  localStorage.clear(); // Clear all stored data
+  window.location.href = "index.html"; // Redirect to login page
+});
+
   /****************************************************
    * ON PAGE LOAD
    ****************************************************/
