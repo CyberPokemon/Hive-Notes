@@ -224,43 +224,78 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
   /****************************************************
-   * SEARCHING NOTES
-   ****************************************************/
-  searchBar.addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (currentFolderIndex == null) return;
+ * SEARCHING NOTES (Fetch from API)
+ ****************************************************/
+searchBar.addEventListener("input", async (e) => {
+  const query = e.target.value.toLowerCase().trim();
+  if (!query) {
+    fetchFoldersData(); // If the search bar is empty, reload all notes
+    return;
+  }
 
-    const folder = foldersData[currentFolderIndex];
-    const filteredNotes = folder.notes.filter((note) => {
-      return (
-        note.title.toLowerCase().includes(query) ||
-        note.content.toLowerCase().includes(query) ||
-        note.keywords.toLowerCase().includes(query)
-      );
+  const token = localStorage.getItem("jwtToken"); // Retrieve JWT token
+  if (!token) {
+    console.error("No JWT token found.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://127.0.0.1:8080/api/notes/search?searchTerm=${encodeURIComponent(query)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Send JWT token
+      },
     });
 
-    notesList.innerHTML = "";
-    if (filteredNotes.length === 0) {
-      emptyMessage.style.display = "block";
-    } else {
-      emptyMessage.style.display = "none";
-      filteredNotes.forEach((note, noteIndex) => {
-        const noteItem = document.createElement("div");
-        noteItem.style.border = "1px solid #ddd";
-        noteItem.style.padding = "0.5rem";
-        noteItem.style.borderRadius = "4px";
-        noteItem.style.cursor = "pointer";
-        noteItem.innerHTML = `
-          <h3>${note.title}</h3>
-          <p><strong>Keywords:</strong> ${note.keywords}</p>
-        `;
-        noteItem.addEventListener("click", () => {
-          openEditor(currentFolderIndex, noteIndex);
-        });
-        notesList.appendChild(noteItem);
-      });
+    if (!response.ok) {
+      throw new Error("Failed to fetch search results");
     }
+
+    const searchResults = await response.json();
+    updateSearchResults(searchResults); // Update UI with search results
+
+  } catch (error) {
+    console.error("Error searching notes:", error);
+  }
+});
+
+/****************************************************
+ * UPDATE SEARCH RESULTS IN UI
+ ****************************************************/
+function updateSearchResults(searchResults) {
+  foldersList.innerHTML = ""; // Clear folders list
+  notesList.innerHTML = ""; // Clear notes list
+  emptyMessage.style.display = searchResults.length === 0 ? "block" : "none";
+
+  searchResults.forEach((folder, folderIndex) => {
+    // Create folder item
+    const folderItem = document.createElement("li");
+    folderItem.textContent = folder.name;
+    folderItem.addEventListener("click", () => {
+      showFolderNotes(folderIndex);
+    });
+    foldersList.appendChild(folderItem);
+
+    // Display notes inside this folder
+    folder.notes.forEach((note, noteIndex) => {
+      const noteItem = document.createElement("div");
+      noteItem.style.border = "1px solid #ddd";
+      noteItem.style.padding = "0.5rem";
+      noteItem.style.borderRadius = "4px";
+      noteItem.style.cursor = "pointer";
+      noteItem.innerHTML = `
+        <h3>${note.title}</h3>
+        <p><strong>Keywords:</strong> ${note.keywords}</p>
+      `;
+      noteItem.addEventListener("click", () => {
+        openEditor(folderIndex, noteIndex);
+      });
+      notesList.appendChild(noteItem);
+    });
   });
+}
+
 
   /****************************************************
    * ON PAGE LOAD
