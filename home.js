@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     try {
-      const response = await fetch("http://localhost:8080/api/notes/all", {
+      const response = await fetch("http://127.0.0.1:8080/api/notes/all", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -108,11 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
    * OPEN EDITOR PAGE
    ****************************************************/
   function openEditor(folderIndex, noteIndex) {
+    const folder = foldersData[folderIndex];
+    const note = folder.notes[noteIndex];
     // 1) Save the entire data structure to localStorage
     localStorage.setItem("foldersData", JSON.stringify(foldersData));
     // 2) Save which note we’re opening
     localStorage.setItem("currentFolderIndex", folderIndex);
     localStorage.setItem("currentNoteIndex", noteIndex);
+    localStorage.setItem("currentContentId", note.contentid);
     // 3) Redirect to editor.html
     window.location.href = "editor.html";
   }
@@ -165,49 +168,60 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Handle new note creation
-  newNoteForm.addEventListener("submit", (e) => {
+  newNoteForm.addEventListener("submit", async(e) => {
     e.preventDefault();
 
-    const noteName = noteTitleInput.value.trim();
-    let folderName = noteFolderSelect.value;
-    const typedFolderName = newFolderNameInput.value.trim();
-    const noteKeywords = noteKeywordsInput.value.trim();
+  const noteName = noteTitleInput.value.trim();
+  let folderName = noteFolderSelect.value;
+  const typedFolderName = newFolderNameInput.value.trim();
+  const noteKeywords = noteKeywordsInput.value.trim();
+  const token = localStorage.getItem("jwtToken"); // Retrieve JWT token
 
-    // If user selected 'new_folder'
-    if (folderName === "new_folder" && typedFolderName) {
-      folderName = typedFolderName;
-      foldersData.push({
-        name: folderName,
-        notes: [],
-      });
-      populateFoldersList();
+  if (!token) {
+    console.error("No JWT token found.");
+    return;
+  }
+
+  // If user selected 'new_folder', create a new folder
+  if (folderName === "new_folder" && typedFolderName) {
+    folderName = typedFolderName;
+  }
+
+  // Prepare the data object
+  const newNoteData = {
+    noteName: noteName,
+    noteFolder: folderName,
+    noteKeywords: noteKeywords,
+  };
+
+  try {
+    // Send the new note to the API
+    const response = await fetch("http://127.0.0.1:8080/api/notes/createnote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Send JWT token
+      },
+      body: JSON.stringify(newNoteData), // Convert data to JSON format
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error creating note: ${response.statusText}`);
     }
 
-    // Find or create the target folder
-    let targetFolderIndex = foldersData.findIndex((f) => f.name === folderName);
-    if (targetFolderIndex === -1) {
-      foldersData.push({ name: folderName, notes: [] });
-      targetFolderIndex = foldersData.length - 1;
-    }
+    console.log("Note successfully created");
 
-    // Create a new note object
-    const newNote = {
-      title: noteName,
-      keywords: noteKeywords,
-      content: "<p>Start writing your content here...</p>",
-    };
-    foldersData[targetFolderIndex].notes.push(newNote);
-
-    // Clear form & hide modal
+    // Clear the form & hide the modal
     newNoteForm.reset();
     newFolderField.style.display = "none";
     newNoteModal.style.display = "none";
 
-    // If currently viewing that folder, refresh
-    if (currentFolderIndex === targetFolderIndex) {
-      showFolderNotes(targetFolderIndex);
-    }
-  });
+    // Fetch updated data from API & update the UI
+    fetchFoldersData();
+  } catch (error) {
+    console.error("Failed to create note:", error);
+  }
+});
 
   /****************************************************
    * SEARCHING NOTES
