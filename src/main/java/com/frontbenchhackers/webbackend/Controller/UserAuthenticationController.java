@@ -28,14 +28,14 @@ public class UserAuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> register(@RequestBody Users user) {
-        System.out.println("input details = "+user);
+//        System.out.println("input details = "+user);
         return service.register(user);
     }
 
     @PostMapping("/login")
     public String login(@RequestBody Users user)
     {
-        System.out.println(user);
+//        System.out.println(user);
         return service.verify(user);
     }
 

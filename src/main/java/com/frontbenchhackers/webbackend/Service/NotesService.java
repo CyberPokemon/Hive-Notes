@@ -200,7 +200,7 @@ public class NotesService {
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            System.out.println("Error occurred in getAllNotesFormatted: " + e.getMessage());
+//            System.out.println("Error occurred in getAllNotesFormatted: " + e.getMessage());
 //            e.printStackTrace(); // Print full stack trace for better debugging
             return Collections.emptyList();  // Return an empty list in case of error
         }

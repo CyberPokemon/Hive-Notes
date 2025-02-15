@@ -47,10 +47,10 @@ public class UserService {
 
         Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
         if (authentication.isAuthenticated()) {
-            System.out.println("User Authenticated: " + user.getUsername());
+//            System.out.println("User Authenticated: " + user.getUsername());
             return jwtService.generateToken(user.getUsername());
         } else {
-            System.out.println("Authentication Failed for: " + user.getUsername());
+//            System.out.println("Authentication Failed for: " + user.getUsername());
         }
         return "FAIL";
     }

@@ -35,7 +35,7 @@ public class JWTService {
 
     public String generateToken(String username) {
 
-        System.out.println("SEcret key = "+secretkey);
+//        System.out.println("SEcret key = "+secretkey);
 
         Map<String,Object> claims = new HashMap<>();
         return Jwts.builder()
@@ -64,17 +64,17 @@ public class JWTService {
 
     public String extractUsername(String token) {
         try {
-            System.out.println("Extracting username from token: " + token);
+//            System.out.println("Extracting username from token: " + token);
             String username = Jwts.parser()
                     .verifyWith(getKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
-            System.out.println("Extracted username: " + username);
+//            System.out.println("Extracted username: " + username);
             return username;
         } catch (Exception e) {
-            System.out.println("JWT Token parsing error: " + e.getMessage());
+//            System.out.println("JWT Token parsing error: " + e.getMessage());
             return null;
         }
     }
