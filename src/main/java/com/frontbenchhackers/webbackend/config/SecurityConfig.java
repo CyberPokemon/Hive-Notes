@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login","/api/notes/all","/api/notes/createnode").permitAll()  // Allow auth endpoints
+                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()  // Allow auth endpoints
                         //.requestMatchers("/api/notes/createnote").authenticated()  // Secure create note endpoint
                         .anyRequest().authenticated()  // Secure other endpoints
                 )
